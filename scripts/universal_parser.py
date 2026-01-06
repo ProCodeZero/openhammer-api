@@ -3,7 +3,7 @@ import json
 import re
 from pathlib import Path
 
-def parse_catalogue(filepath, faction_type=None):
+def parse_catalogue(filepath, faction_type=None, parent_catalogue=None):
     tree = ET.parse(filepath)
     root = tree.getroot()
 
@@ -12,6 +12,12 @@ def parse_catalogue(filepath, faction_type=None):
     # Extract faction from catalogue name
     catalogue_name = root.get('name', '')
     faction = extract_faction(catalogue_name)
+
+    # Load parent catalogue if this is a Space Marine chapter supplement
+    parent_root = None
+    if parent_catalogue and Path(parent_catalogue).exists():
+        parent_tree = ET.parse(parent_catalogue)
+        parent_root = parent_tree.getroot()
 
     units = []
 
@@ -112,8 +118,13 @@ def parse_catalogue(filepath, faction_type=None):
                     # Try to get the actual invuln value by following the targetId
                     target_id = info_link.get('targetId')
                     if target_id:
-                        # Find the target profile in the root
+                        # Find the target profile in the current file first
                         target_profile = root.find(f'.//bs:profile[@id="{target_id}"]', ns)
+
+                        # If not found and we have a parent catalogue, check there
+                        if not target_profile and parent_root is not None:
+                            target_profile = parent_root.find(f'.//bs:profile[@id="{target_id}"]', ns)
+
                         if target_profile:
                             desc_elem = target_profile.find('.//bs:characteristic[@name="Description"]', ns)
                             if desc_elem is not None and desc_elem.text:
@@ -359,62 +370,64 @@ def get_output_filename(catalogue_file):
 
 def main():
     # List of catalogue files to process with their faction types
-    # Format: (filepath, faction_type)
+    # Format: (filepath, faction_type, optional_parent_catalogue)
+    space_marines_parent = 'data/BSData/Imperium - Space Marines.cat'
+
     catalogue_files = [
         # Imperium
-        ('data/BSData/Imperium - Adepta Sororitas.cat', 'Imperium'),
-        ('data/BSData/Imperium - Adeptus Custodes.cat', 'Imperium'),
-        ('data/BSData/Imperium - Adeptus Mechanicus.cat', 'Imperium'),
-        ('data/BSData/Imperium - Agents of the Imperium.cat', 'Imperium'),
-        ('data/BSData/Imperium - Astra Militarum - Library.cat', 'Imperium'),
-        ('data/BSData/Imperium - Black Templars.cat', 'Imperium'),
-        ('data/BSData/Imperium - Blood Angels.cat', 'Imperium'),
-        ('data/BSData/Imperium - Dark Angels.cat', 'Imperium'),
-        ('data/BSData/Imperium - Deathwatch.cat', 'Imperium'),
-        ('data/BSData/Imperium - Grey Knights.cat', 'Imperium'),
-        ('data/BSData/Imperium - Imperial Fists.cat', 'Imperium'),
-        ('data/BSData/Imperium - Imperial Knights - Library.cat', 'Imperium'),
-        ('data/BSData/Imperium - Iron Hands.cat', 'Imperium'),
-        ('data/BSData/Imperium - Raven Guard.cat', 'Imperium'),
-        ('data/BSData/Imperium - Salamanders.cat', 'Imperium'),
-        ('data/BSData/Imperium - Space Marines.cat', 'Imperium'),
-        ('data/BSData/Imperium - Space Wolves.cat', 'Imperium'),
-        ('data/BSData/Imperium - Ultramarines.cat', 'Imperium'),
-        ('data/BSData/Imperium - White Scars.cat', 'Imperium'),
+        ('data/BSData/Imperium - Adepta Sororitas.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Adeptus Custodes.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Adeptus Mechanicus.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Agents of the Imperium.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Astra Militarum - Library.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Black Templars.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Blood Angels.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Dark Angels.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Deathwatch.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Grey Knights.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Imperial Fists.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Imperial Knights - Library.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Iron Hands.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Raven Guard.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Salamanders.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Space Marines.cat', 'Imperium', None),
+        ('data/BSData/Imperium - Space Wolves.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - Ultramarines.cat', 'Imperium', space_marines_parent),
+        ('data/BSData/Imperium - White Scars.cat', 'Imperium', space_marines_parent),
         # Chaos
-        ('data/BSData/Chaos - Chaos Daemons Library.cat', 'Chaos'),
-        ('data/BSData/Chaos - Chaos Knights Library.cat', 'Chaos'),
-        ('data/BSData/Chaos - Chaos Space Marines.cat', 'Chaos'),
-        ('data/BSData/Chaos - Death Guard.cat', 'Chaos'),
-        ('data/BSData/Chaos - Emperor\'s Children.cat', 'Chaos'),
-        ('data/BSData/Chaos - Thousand Sons.cat', 'Chaos'),
-        ('data/BSData/Chaos - World Eaters.cat', 'Chaos'),
+        ('data/BSData/Chaos - Chaos Daemons Library.cat', 'Chaos', None),
+        ('data/BSData/Chaos - Chaos Knights Library.cat', 'Chaos', None),
+        ('data/BSData/Chaos - Chaos Space Marines.cat', 'Chaos', None),
+        ('data/BSData/Chaos - Death Guard.cat', 'Chaos', None),
+        ('data/BSData/Chaos - Emperor\'s Children.cat', 'Chaos', None),
+        ('data/BSData/Chaos - Thousand Sons.cat', 'Chaos', None),
+        ('data/BSData/Chaos - World Eaters.cat', 'Chaos', None),
         # Xenos
-        ('data/BSData/Aeldari - Aeldari Library.cat', 'Xenos'),  # Library has the units
+        ('data/BSData/Aeldari - Aeldari Library.cat', 'Xenos', None),  # Library has the units
         # Skip: 'data/BSData/Aeldari - Craftworlds.cat',  # Just references Library
         # Skip: 'data/BSData/Aeldari - Drukhari.cat',  # Just references Library
         # Skip: 'data/BSData/Aeldari - Ynnari.cat',  # Just references Library
-        ('data/BSData/Genestealer Cults.cat', 'Xenos'),
-        ('data/BSData/Leagues of Votann.cat', 'Xenos'),
-        ('data/BSData/Library - Tyranids.cat', 'Xenos'),  # Library has the units
+        ('data/BSData/Genestealer Cults.cat', 'Xenos', None),
+        ('data/BSData/Leagues of Votann.cat', 'Xenos', None),
+        ('data/BSData/Library - Tyranids.cat', 'Xenos', None),  # Library has the units
         # Skip: 'data/BSData/Tyranids.cat',  # Just references Library
-        ('data/BSData/Necrons.cat', 'Xenos'),
-        ('data/BSData/Orks.cat', 'Xenos'),
-        ('data/BSData/T\'au Empire.cat', 'Xenos'),
+        ('data/BSData/Necrons.cat', 'Xenos', None),
+        ('data/BSData/Orks.cat', 'Xenos', None),
+        ('data/BSData/T\'au Empire.cat', 'Xenos', None),
         # Unaligned
-        ('data/BSData/Library - Titans.cat', 'Unaligned'),
-        ('data/BSData/Unaligned Forces.cat', 'Unaligned')
+        ('data/BSData/Library - Titans.cat', 'Unaligned', None),
+        ('data/BSData/Unaligned Forces.cat', 'Unaligned', None)
     ]
 
     # Create output directory
     Path('data/json').mkdir(parents=True, exist_ok=True)
 
     # Process each catalogue file
-    for catalogue_file, faction_type in catalogue_files:
+    for catalogue_file, faction_type, parent_catalogue in catalogue_files:
         print(f"Processing: {catalogue_file}")
 
-        # Parse the catalogue with faction type
-        units = parse_catalogue(catalogue_file, faction_type)
+        # Parse the catalogue with faction type and parent
+        units = parse_catalogue(catalogue_file, faction_type, parent_catalogue)
 
         # Generate output filename using consistent naming
         output_filename = get_output_filename(catalogue_file)

@@ -64,7 +64,7 @@ Works with Railway, Fly.io, or any platform with Python support.
 
 ### What You Can Do
 
-The OpenHammer API provides **35+ endpoints** for accessing Warhammer 40K unit data:
+The OpenHammer API provides **29 endpoints** for accessing Warhammer 40K unit data:
 
 - **Search & Filter**: Find units by name, faction, points cost, keywords, abilities
 - **Faction Analytics**: Get detailed stats, breakdowns, and insights for any faction
@@ -157,14 +157,14 @@ This will:
 - `GET /` - API information
 - `GET /stats` - API statistics (total units, factions, breakdown)
 
-**Factions** (7 endpoints)
+**Factions** (5 endpoints)
 - `GET /factions` - List all factions
 - `GET /factions/{faction_name}/units` - Get faction units
 - `GET /factions/{faction_name}/details` - Comprehensive faction details
 - `GET /factions/{faction_name}/stats` - Statistical breakdown
 - `GET /factions/{faction_name}/keywords` - Faction keywords with counts
 
-**Units** (11 endpoints)
+**Units** (8 endpoints)
 - `GET /units` - Search/filter units (10+ query parameters)
 - `GET /units/{unit_id}` - Get specific unit
 - `GET /units/search/name/{name}` - Search by name
@@ -186,7 +186,7 @@ This will:
 - `GET /abilities/special-rules/list` - List special rules
 - `GET /abilities/special-rules/search/{rule}` - Find units by rule
 
-**Bulk Operations** (7 endpoints)
+**Bulk Operations** (6 endpoints)
 - `GET /bulk/units/by-ids` - Bulk lookup by IDs
 - `GET /bulk/units/by-names` - Bulk lookup by names
 - `GET /bulk/stats/by-keyword` - Aggregate stats by keyword
@@ -420,10 +420,8 @@ openhammer-api/
 │       └── Unaligned_-_*.json
 ├── scripts/
 │   └── universal_parser.py  # XML to JSON parser
-├── tests/                   # Test files
-│   ├── test_api.py
-│   ├── test_all_endpoints.py
-│   └── test_sorting.py
+├── tests/
+│   └── test_api.py          # API endpoint tests
 ├── requirements.txt
 ├── render.yaml              # Render deployment config
 └── README.md                # This file
@@ -456,31 +454,11 @@ app.add_middleware(
 
 ## Testing
 
-### Run All Endpoint Tests
-
 ```bash
-python tests/test_all_endpoints.py
+python tests/test_api.py
 ```
 
-### Run Bulk Operation Tests
-
-```bash
-python tests/test_bulk_endpoints.py
-```
-
-### Run Sorting Tests
-
-```bash
-python tests/test_sorting.py
-```
-
-### Interactive Testing
-
-Visit http://localhost:8000/docs for interactive Swagger UI where you can:
-- Browse all endpoints
-- See request/response schemas
-- Test API calls directly in the browser
-- View example responses
+Or use the interactive docs at http://localhost:8000/docs
 
 ---
 

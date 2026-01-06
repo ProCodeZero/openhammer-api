@@ -21,7 +21,7 @@
       "LD": "6+",
       "OC": "1"
     },
-    "invuln_save": "Invulnerable Save",
+    "invuln_save": "4+",
     "transport": null,
     "weapons": {
       "ranged": [],
@@ -96,7 +96,7 @@
       "LD": "6+",
       "OC": "1"
     },
-    "invuln_save": "Invulnerable Save",
+    "invuln_save": "4+",
     "transport": null,
     "weapons": {
       "ranged": [
@@ -177,7 +177,7 @@
       "LD": "6+",
       "OC": "1"
     },
-    "invuln_save": "Invulnerable Save",
+    "invuln_save": "4+",
     "transport": null,
     "weapons": {
       "ranged": [
