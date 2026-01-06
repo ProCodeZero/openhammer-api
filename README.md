@@ -1,62 +1,28 @@
 # OpenHammer API
 
-A comprehensive Warhammer 40,000 10th Edition data parser and REST API that converts BattleScribe XML catalogues into clean, structured JSON and serves it via a high-performance API.
+REST API for Warhammer 40,000 10th Edition unit data. 1,285 units across 35 factions.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
-- [Deployment](#deployment)
 - [API Overview](#api-overview)
 - [Data Coverage](#data-coverage)
-- [Parser Usage](#parser-usage)
 - [API Endpoints](#api-endpoints)
 - [JSON Structure](#json-structure)
-- [Architecture](#architecture)
 
 ---
 
 ## Quick Start
 
-### 1. Install Dependencies
+To run this API locally:
 
 ```bash
+git clone https://github.com/yourusername/openhammer-api.git
+cd openhammer-api
 pip install -r requirements.txt
-```
-
-### 2. Parse Data (Optional - JSON files already included)
-
-```bash
-python scripts/universal_parser.py
-```
-
-### 3. Run the API
-
-```bash
 uvicorn api.main:app --reload
 ```
 
-Or using Python directly:
-
-```bash
-python -m uvicorn api.main:app --reload
-```
-
-The API will be available at:
-- **API**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
----
-
-## Deployment
-
-Deploy to Render (free tier):
-1. Push code to GitHub
-2. Sign up at [Render](https://render.com)
-3. Click "New +" → "Blueprint" → Connect repo
-4. Render auto-detects `render.yaml` → Click "Apply"
-5. Your API is live in ~3 minutes at `https://your-app.onrender.com`
-
-Works with Railway, Fly.io, or any platform with Python support.
+Visit http://localhost:8000/docs for interactive documentation.
 
 ---
 
@@ -79,18 +45,15 @@ The OpenHammer API provides **29 endpoints** for accessing Warhammer 40K unit da
 - **Response Time**: <10ms for most queries
 - **Data**: 1,285 units across 35 factions
 
-### Key Features
+### Features
 
-- **In-Memory Storage**: All data loaded at startup for lightning-fast queries
-- **HTTP Caching**: Responses cached for 1 hour (Cache-Control headers)
-- **Rate Limiting**: 100 requests/minute per IP (prevents abuse)
-- **Auto-Generated Docs**: Interactive Swagger/OpenAPI documentation
-- **Extensive Filtering**: 11+ query parameters for precise searches
-- **Flexible Sorting**: Sort by name, points, or faction (ascending/descending)
-- **Bulk Operations**: Batch lookups and aggregated statistics
-- **Faction Analytics**: Detailed breakdowns by faction, faction type, and keyword
-- **CORS Enabled**: Ready for frontend integration
-- **Production Ready**: Deploy to Render, Railway, or any cloud platform
+- In-memory storage with <10ms response times
+- HTTP caching (1 hour)
+- Rate limiting (100 req/min per IP)
+- Interactive Swagger docs at `/docs`
+- Sorting and filtering across 11+ parameters
+- Bulk operations and faction analytics
+- CORS enabled
 
 ---
 
@@ -120,34 +83,6 @@ Titanicus (shared between Imperium and Chaos), Unaligned Forces
 
 ---
 
-## Parser Usage
-
-### Running the Parser
-
-```bash
-python scripts/universal_parser.py
-```
-
-This will:
-1. Parse all catalogue files from `data/BSData/`
-2. Extract unit data for all 35 factions
-3. Generate JSON files in `data/json/`
-
-### Parser Features
-
-- **Dual invulnerable save detection**: Checks both infoLinks and ability profiles
-- **Library catalogue support**: Properly handles factions that use Library files (Astra Militarum, Imperial Knights, Titans, etc.)
-- **Consistent naming**: Automatically renames Library outputs to match wrapper catalogue names
-- **Organizational prefixes**: Adds faction-type prefixes (Imperium_, Chaos_, Xenos_, Unaligned_) for easy organization
-- **Cross-faction compatibility**: Handles shared catalogues like Titanicus
-
-### Known Limitations
-
-1. **Cross-catalogue references**: Some Space Marine chapter supplements (~50 units) have generic "Invulnerable Save" values because they reference parent catalogue profiles that the parser doesn't follow
-2. **Variable cost units**: Some units (especially Legends) may have `null` or `0` points if they have variable costs
-3. **Optional wargear**: The parser filters out invulnerable saves from optional wargear to show only base unit characteristics
-
----
 
 ## API Endpoints
 
@@ -371,104 +306,10 @@ Both ranged and melee weapons follow a consistent structure:
 
 ---
 
-## Architecture
-
-### Technology Stack
-
-- **FastAPI**: Modern Python web framework with automatic API documentation
-- **Pydantic**: Data validation and serialization
-- **Uvicorn**: High-performance ASGI server
-- **lxml**: XML parsing for BattleScribe catalogues
-
-### Data Flow
-
-```
-BattleScribe XML (.cat files)
-         ↓
-  Universal Parser (scripts/universal_parser.py)
-         ↓
-  JSON Files (data/json/*.json)
-         ↓
-  DataStore (api/data_loader.py) - In-Memory Storage
-         ↓
-  FastAPI Routes (api/routers/*.py)
-         ↓
-  REST API Endpoints
-```
-
-### Project Structure
-
-```
-openhammer-api/
-├── api/
-│   ├── __init__.py
-│   ├── main.py              # FastAPI app and core endpoints
-│   ├── models.py            # Pydantic data models
-│   ├── data_loader.py       # In-memory data store
-│   └── routers/
-│       ├── units.py         # Unit-specific endpoints
-│       ├── weapons.py       # Weapon endpoints
-│       ├── abilities.py     # Ability/keyword endpoints
-│       ├── factions.py      # Faction detail endpoints
-│       └── bulk.py          # Bulk operations
-├── data/
-│   ├── BSData/              # BattleScribe source catalogues (.cat files)
-│   └── json/                # Generated JSON outputs
-│       ├── Imperium_-_*.json
-│       ├── Chaos_-_*.json
-│       ├── Xenos_-_*.json
-│       └── Unaligned_-_*.json
-├── scripts/
-│   └── universal_parser.py  # XML to JSON parser
-├── tests/
-│   └── test_api.py          # API endpoint tests
-├── requirements.txt
-├── render.yaml              # Render deployment config
-└── README.md                # This file
-```
-
-### In-Memory Storage
-
-The API uses an in-memory data store for optimal performance:
-
-- **DataStore Class**: Loads all JSON on startup, builds multiple indices
-- **Indices**: By ID, faction, faction_type for O(1) lookups
-- **Search**: Filters results in-memory with sub-10ms response times
-- **Memory Footprint**: ~10-15MB for 1,285 units
-
-### CORS Configuration
-
-CORS is enabled for all origins by default. For production, update `api/main.py`:
-
-```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://yourdomain.com"],  # Specify your domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
-
----
-
-## Testing
-
-```bash
-python tests/test_api.py
-```
-
-Or use the interactive docs at http://localhost:8000/docs
-
----
-
-## Data Source
-
-All data is parsed from official BattleScribe catalogue files maintained by the community at:
-https://github.com/BSData/wh40k-10e
-
 ---
 
 ## License
 
-This is a data parsing tool for personal use. All Warhammer 40,000 content is property of Games Workshop.
+MIT License - see LICENSE file.
+
+All Warhammer 40,000 content is property of Games Workshop.
