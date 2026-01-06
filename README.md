@@ -44,23 +44,19 @@ The API will be available at:
 - **API**: http://localhost:8000
 - **Interactive Docs**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
-- **Endpoint Reference**: See [ENDPOINTS.md](docs/ENDPOINTS.md)
 
 ---
 
 ## Deployment
 
-Deploy your own instance to the cloud:
-
-**Quick Deploy to Render (Free Tier)**:
+Deploy to Render (free tier):
 1. Push code to GitHub
 2. Sign up at [Render](https://render.com)
-3. Connect your repo → Render auto-detects `render.yaml`
-4. Click "Apply" → Your API is live in ~3 minutes
+3. Click "New +" → "Blueprint" → Connect repo
+4. Render auto-detects `render.yaml` → Click "Apply"
+5. Your API is live in ~3 minutes at `https://your-app.onrender.com`
 
-For detailed deployment instructions, see **[DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
-
-**Other platforms**: Railway, Fly.io, DigitalOcean, AWS, GCP all work. See deployment guide for details.
+Works with Railway, Fly.io, or any platform with Python support.
 
 ---
 
@@ -154,8 +150,6 @@ This will:
 ---
 
 ## API Endpoints
-
-For the complete endpoint reference with examples, see **[ENDPOINTS.md](ENDPOINTS.md)**.
 
 ### Quick Reference
 
@@ -430,11 +424,8 @@ openhammer-api/
 │   ├── test_api.py
 │   ├── test_all_endpoints.py
 │   └── test_sorting.py
-├── docs/                    # Documentation
-│   ├── ENDPOINTS.md
-│   ├── DEPLOYMENT.md
-│   └── PROJECT_STRUCTURE.md
 ├── requirements.txt
+├── render.yaml              # Render deployment config
 └── README.md                # This file
 ```
 
