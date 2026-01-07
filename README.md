@@ -2,8 +2,13 @@
 
 REST API for Warhammer 40,000 10th Edition unit data. 1,285 units across 35 factions.
 
+**Live API**: https://openhammer-api.onrender.com
+
+**Interactive Docs**: https://openhammer-api.onrender.com/docs
+
 ## Table of Contents
-- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Quick Start (Local)](#quick-start-local)
 - [API Overview](#api-overview)
 - [Data Coverage](#data-coverage)
 - [API Endpoints](#api-endpoints)
@@ -11,12 +16,67 @@ REST API for Warhammer 40,000 10th Edition unit data. 1,285 units across 35 fact
 
 ---
 
-## Quick Start
+## Usage
+
+The API is live at **https://openhammer-api.onrender.com**
+
+### Python
+```python
+import requests
+
+# Get all factions
+response = requests.get('https://openhammer-api.onrender.com/factions')
+factions = response.json()
+
+# Search for Space Marine units
+response = requests.get('https://openhammer-api.onrender.com/units?name=Marine&limit=10')
+units = response.json()
+
+# Get random unit
+response = requests.get('https://openhammer-api.onrender.com/units/random')
+random_unit = response.json()
+```
+
+### JavaScript
+```javascript
+// Get API statistics
+fetch('https://openhammer-api.onrender.com/stats')
+  .then(res => res.json())
+  .then(data => console.log(data));
+
+// Search Necrons units
+const response = await fetch('https://openhammer-api.onrender.com/units?faction=Necrons');
+const units = await response.json();
+```
+
+### curl
+```bash
+# Get all factions
+curl https://openhammer-api.onrender.com/factions
+
+# Search for Terminator units
+curl https://openhammer-api.onrender.com/units?name=Terminator
+
+# Get faction details
+curl https://openhammer-api.onrender.com/factions/Necrons/details
+```
+
+### Interactive Testing
+
+Visit **https://openhammer-api.onrender.com/docs** to:
+- Browse all 29 endpoints
+- Try requests directly in your browser
+- See example responses
+- View request/response schemas
+
+---
+
+## Quick Start (Local)
 
 To run this API locally:
 
 ```bash
-git clone https://github.com/yourusername/openhammer-api.git
+git clone https://github.com/EshanPrakash/openhammer-api.git
 cd openhammer-api
 pip install -r requirements.txt
 uvicorn api.main:app --reload
@@ -133,25 +193,25 @@ Titanicus (shared between Imperium and Chaos), Unaligned Forces
 
 ```bash
 # Get all Chaos units with invulnerable saves
-curl 'http://localhost:8000/units?faction_type=Chaos&has_invuln=true'
+curl 'https://openhammer-api.onrender.com/units?faction_type=Chaos&has_invuln=true'
 
 # Get most expensive units across all factions
-curl 'http://localhost:8000/units?sort_by=-points&limit=10'
+curl 'https://openhammer-api.onrender.com/units?sort_by=-points&limit=10'
 
 # Get cheapest Imperium units
-curl 'http://localhost:8000/units?faction_type=Imperium&sort_by=points&limit=20'
+curl 'https://openhammer-api.onrender.com/units?faction_type=Imperium&sort_by=points&limit=20'
 
 # Search for bolter weapons
-curl 'http://localhost:8000/weapons/search/bolter'
+curl 'https://openhammer-api.onrender.com/weapons/search/bolter'
 
 # Get faction details for Necrons
-curl 'http://localhost:8000/factions/Necrons/details'
+curl 'https://openhammer-api.onrender.com/factions/Necrons/details'
 
 # Get stats for all Infantry units
-curl 'http://localhost:8000/bulk/stats/by-keyword?keyword=Infantry'
+curl 'https://openhammer-api.onrender.com/bulk/stats/by-keyword?keyword=Infantry'
 
 # Get comprehensive Imperium statistics
-curl 'http://localhost:8000/bulk/stats/by-faction-type?faction_type=Imperium'
+curl 'https://openhammer-api.onrender.com/bulk/stats/by-faction-type?faction_type=Imperium'
 ```
 
 ### Main Search Endpoint
